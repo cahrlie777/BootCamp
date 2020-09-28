@@ -18,11 +18,23 @@ mongoose.connect('mongodb://localhost/bootcamp', {
 //Scheama setup
 let campgroundSchema =  new mongoose.Schema({
    name: String,
-   image: String
+   image: String,
+  description: String
 });
 
 let Campground = mongoose.model("Campground",campgroundSchema);
 
+//Campground.create({
+  //name: "Granite Hill",
+  //image: "https://i.guim.co.uk/img/media/fe1e34da640c5c56ed16f76ce6f994fa9343d09d/0_174_3408_2046/master/3408.jpg?width=620&quality=85&auto=format&fit=max&s=56d5de4c5609ca98def0c3382bd569b4",
+  //description: "This is a white Pug."
+//}, (err,newlyCampground) => {
+    //if(err){
+      //console.log(err);
+    //}else{
+      //console.log(newlyCampground);
+    //}
+//});
 
 //Routes
 app.get("/", (req, res) =>{
@@ -34,7 +46,7 @@ app.get("/campgrounds", (req, res) => {
     if(err){
 
     }else{
-    res.render("campgrounds", {campgrounds: allcampgrounds});
+    res.render("index", {campgrounds: allcampgrounds});
     }
   })
 });
@@ -46,8 +58,9 @@ app.get("/campgrounds/new",(req, res) =>{
 app.post("/campgrounds",(req, res)=>{
   let name = req.body.name;
   let image = req.body.image;
-  let newCampground = {name: name, image: image};
-  Campground.create(newCampground,(err,camground)=>{
+  let description = req.body.description;
+  let newCampground = {name: name, image: image, description: description};
+  Campground.create(newCampground,(err,newlyCampground)=>{
     if(err){
       console.log(err);
     }else{
@@ -56,6 +69,16 @@ app.post("/campgrounds",(req, res)=>{
   });
 });
 
+//Shows more info about the image
+app.get("/campgrounds/:id", (req, res)=>{
+  Campground.findById(req.params.id, (err, foundCampground) =>{
+    if(err){
+      console.log(err);
+    }else{
+      res.render("shows", {campground: foundCampground});
+    }
+  });
+});
 
 //Start Server
 app.listen(3000, () =>{
