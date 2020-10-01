@@ -1,28 +1,24 @@
+
 const express    = require("express"),
       app        = express(),
       bodyParser = require("body-parser"),
-      mongoose   = require("mongoose");
-
+      mongoose   = require("mongoose"),
+      Campground = require("./models/campground"),
+      SeedDB     = require("./seeds"),
+      Comment    = require("./models/comment")
 
 //Confuguration
 app.use( bodyParser.urlencoded({extended: true}));
+app.use(express.static(__dirname + "/public"));
 app.set("view engine", "ejs");
+SeedDB();
 
-mongoose.connect('mongodb://localhost/bootcamp', {
+mongoose.connect('mongodb://localhost/bootcamp3', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useFindAndModify: false,
   useCreateIndex: true
 });
-
-//Scheama setup
-let campgroundSchema =  new mongoose.Schema({
-   name: String,
-   image: String,
-  description: String
-});
-
-let Campground = mongoose.model("Campground",campgroundSchema);
 
 //Campground.create({
   //name: "Granite Hill",
@@ -46,13 +42,13 @@ app.get("/campgrounds", (req, res) => {
     if(err){
 
     }else{
-    res.render("index", {campgrounds: allcampgrounds});
+    res.render("campgrounds/index", {campgrounds: allcampgrounds});
     }
   })
 });
 
 app.get("/campgrounds/new",(req, res) =>{
-  res.render("new.ejs")
+  res.render("campgrounds/new.ejs")
 });
 
 app.post("/campgrounds",(req, res)=>{
@@ -69,16 +65,52 @@ app.post("/campgrounds",(req, res)=>{
   });
 });
 
+
 //Shows more info about the image
 app.get("/campgrounds/:id", (req, res)=>{
-  Campground.findById(req.params.id, (err, foundCampground) =>{
+  Campground.findById(req.params.id).populate("comments").exec((err, foundCampground) =>{
     if(err){
       console.log(err);
     }else{
-      res.render("shows", {campground: foundCampground});
+      console.log(foundCampground);
+      res.render("campgrounds/shows", {campground: foundCampground});
     }
   });
 });
+
+
+app.get("/campgrounds/:id/comments/new",(req, res)=>{
+  Campground.findById(req.params.id, (err, campground) =>{
+    if(err){
+      console.log(err);
+    }else{
+      res.render("comments/new", {campground: campground});
+      }
+  })
+});
+
+app.post("/campgrounds/:id/comments", (req, res) => {
+    Campground.findById(req.params.id, (err, campground) =>{
+    if(err){
+      console.log(err);
+      res.redirect("/campgrounds");
+    }else{
+      Comment.create(req.body.comment, (err, comment) =>{
+        if(err){
+          console.log(err);
+        }else{
+          campground.comments.push(comment);
+          campground.save();
+          res.redirect("/campgrounds/" + campground._id);
+        }
+      });
+    }
+  });
+});
+
+
+
+
 
 //Start Server
 app.listen(3000, () =>{
