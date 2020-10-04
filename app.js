@@ -5,6 +5,7 @@ const express    = require("express"),
       SeedDB     = require("./seeds"),
       passport   = require("passport"),
       LocalStrategy = require("passport-local"),
+      methodOverride = require("method-override"),
       User       = require("./models/users");
 
 const campgroundRoutes = require("./routes/campgrounds"),
@@ -24,7 +25,7 @@ app.use(require("express-session")({
   resave: false,
   saveUninitialized: false
 }));
-
+app.use(methodOverride("_method"));
 app.use(passport.initialize());
 app.use(passport.session());
 passport.use(new LocalStrategy(User.authenticate()));
