@@ -7,11 +7,7 @@ let midleware = require("../middleware");
 //Index - show all campgrounds
 router.get("/campgrounds", (req, res) => {
   Campground.find({}, (err, allcampgrounds) =>{
-    if(err){
-
-    }else{
       res.render("campgrounds/index", {campgrounds: allcampgrounds, currentUser: req.user});
-    }
   })
 });
 
@@ -45,8 +41,9 @@ router.post("/campgrounds",midleware.isLoggedIn,(req, res)=>{
 //Shows more info about the image
 router.get("/campgrounds/:id", (req, res)=>{
   Campground.findById(req.params.id).populate("comments").exec((err, foundCampground) =>{
-    if(err){
-      console.log(err);
+    if(err || !foundCampground){
+      req.flash("error","Campground not found");
+      res.redirect("/campgrounds")
     }else{
       res.render("campgrounds/shows", {campground: foundCampground,currentUser: req.user});
     }

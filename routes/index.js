@@ -17,11 +17,12 @@ router.post("/register",(req, res)=>{
   let newUser = new User({username: req.body.username})
   User.register(newUser,req.body.password,(err, user)=>{
     if(err){
-      console.log(err);
+      req.flash("error", err.message);
       res.render("register");
     }
     passport.authenticate("local")(req, res, ()=>{
-      res.redirect("/campgrounds");
+      req.flash("success", "Welcome " + req.body.username);
+      res.redirect("back");
     });
   });
 });
@@ -35,12 +36,14 @@ router.get("/login", (req,res)=>{
 router.post('/login',
   passport.authenticate('local', { failureRedirect: '/login'  }),
   (req, res)=>{
+        req.flash("success", "Welcome " + req.body.username);
         res.redirect('/campgrounds');
   });
 
 //logic route
 router.get("/logout", (req, res)=>{
   req.logout();
+  req.flash("success", "Logged you out!");
   res.redirect("/");
 });
 
