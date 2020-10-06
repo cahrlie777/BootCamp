@@ -42,7 +42,8 @@ passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-mongoose.connect('mongodb://localhost/bootcamp3', {
+
+mongoose.connect(process.env.DATABASEURL,{
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useFindAndModify: false,
@@ -55,7 +56,7 @@ app.use(commentRoutes);
 app.use(campgroundRoutes);
 
 //Start Server
-app.listen(process.env.PORT || 3000, () =>{
+app.listen(process.env.PORT || 3000, process.env.IP, () =>{
   console.log("Project has started!")
 });
 
