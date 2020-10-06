@@ -55,7 +55,7 @@ app.use(commentRoutes);
 app.use(campgroundRoutes);
 
 //Start Server
-app.listen(3000, () =>{
+app.listen(process.env.PORT || 3000, () =>{
   console.log("Project has started!")
 });
 
