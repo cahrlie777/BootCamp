@@ -47,7 +47,7 @@ let databaseurl = process.env.DATABASEURL || 'mongodb://localhost/bootcamp3'
 mongoose.connect( databaseurl, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-  useFindAndModify: false,
+  useFindAndModify: true,
   useCreateIndex: true
 }).then(()=>{
   console.log("Connected to DB!");
