@@ -42,12 +42,17 @@ passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-
-mongoose.connect(process.env.DATABASEURL,{
+let databaseurl = process.env.DATABASEURL || 'mongodb://localhost/bootcamp3'
+//let urldbs = 'mongodb+srv://dbUser:55972071cha@cluster0.0l0rj.mongodb.net/bootcamp?retryWrites=true&w=majority';
+mongoose.connect( databaseurl, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useFindAndModify: false,
   useCreateIndex: true
+}).then(()=>{
+  console.log("Connected to DB!");
+}).catch(err =>{
+  console.log("ERROR:", err.message);
 });
 
 //Routes
