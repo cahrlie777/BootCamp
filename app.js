@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express    = require("express"),
       app        = express(),
       bodyParser = require("body-parser"),
@@ -42,9 +43,8 @@ passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-let databaseurl = process.env.DATABASEURL || 'mongodb://localhost/bootcamp3'
-//let urldbs = 'mongodb+srv://dbUser:55972071cha@cluster0.0l0rj.mongodb.net/bootcamp?retryWrites=true&w=majority';
-mongoose.connect( databaseurl, {
+//let databaseurl = process.env.DATABASEURL || 'mongodb://localhost/bootcamp3'
+mongoose.connect( 'mongodb://localhost/bootcamp4', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useFindAndModify: true,
