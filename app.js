@@ -43,8 +43,8 @@ passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-//let databaseurl = process.env.DATABASEURL || 'mongodb://localhost/bootcamp3'
-mongoose.connect( 'mongodb://localhost/bootcamp4', {
+let databaseurl = process.env.DATABASEURL || 'mongodb://localhost/bootcamp4'
+mongoose.connect( databaseurl, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useFindAndModify: true,
