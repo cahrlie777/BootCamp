@@ -1,13 +1,18 @@
-let mongoose = require("mongoose");
+const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
 
-let campgroundSchema = new mongoose.Schema({
+const ImageSchema = new Schema({
+    url: String,
+    filename: String
+});
+
+ImageSchema.virtual('thumbnail').get(function () {
+    return this.url.replace('/upload', '/upload/w_200');
+});
+
+const campgroundSchema = new Schema({
    name: String,
-  image: [
-    {
-      url: String,
-      filename: String
-    }
-  ],
+  image: [ImageSchema],
    description: String,
     geometry: {
         type: {
@@ -34,7 +39,12 @@ let campgroundSchema = new mongoose.Schema({
          type: mongoose.Schema.Types.ObjectId,
          ref: "Comment"
       }
-   ]
+   ],
+  deleteImages: [
+    {
+      deleted: String
+    }
+  ]
 });
 
 module.exports = mongoose.model("Campground", campgroundSchema)

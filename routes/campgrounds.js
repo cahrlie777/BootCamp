@@ -9,6 +9,7 @@ const geocoder = mbxGeocoding({ accessToken: mapBoxToken });
 const multer = require('multer');
 const {storage} = require('../cloudinary');
 const upload = multer({storage});
+const {cloudinary} =require('../cloudinary');
 
 
 //Index - show all campgrounds
@@ -82,6 +83,7 @@ router.get("/campgrounds/:id/edit",midleware.checkOwnership,(req, res)=>{
 
 //Update campground route
 router.put("/campgrounds/:id",[midleware.checkOwnership, upload.array('image')], async (req, res)=>{
+  console.log(req.body);
   const geoData = await geocoder.forwardGeocode({
         query: req.body.campground.location,
         limit: 1
@@ -93,6 +95,16 @@ router.put("/campgrounds/:id",[midleware.checkOwnership, upload.array('image')],
   const campground = await Campground.findByIdAndUpdate(req.params.id, {...updateCamp});
   campground.image.push(...image);
   await campground.save();
+
+ if (req.body.deleteImages) {
+
+        for (let filename of req.body.deleteImages) {
+            await cloudinary.uploader.destroy(filename);
+        }
+
+        await campground.updateOne({ $pull: { image: { filename: { $in: req.body.deleteImages } } } })
+    };
+
   req.flash('success', 'Successfully updated campground!');
   res.redirect(`/campgrounds/${campground._id}`)
 });
