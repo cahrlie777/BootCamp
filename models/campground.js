@@ -2,7 +2,12 @@ let mongoose = require("mongoose");
 
 let campgroundSchema = new mongoose.Schema({
    name: String,
-   image: String,
+  image: [
+    {
+      url: String,
+      filename: String
+    }
+  ],
    description: String,
     geometry: {
         type: {

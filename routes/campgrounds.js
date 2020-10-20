@@ -1,11 +1,14 @@
-let express = require("express");
-let router  = express.Router();
-let Campground = require("../models/campground");
-let Comment = require("../models/comment");
-let midleware = require("../middleware");
+const express = require("express");
+const router  = express.Router();
+const Campground = require("../models/campground");
+const Comment = require("../models/comment");
+const midleware = require("../middleware");
 const mbxGeocoding = require("@mapbox/mapbox-sdk/services/geocoding");
 const mapBoxToken = process.env.MAPBOX_TOKEN;
 const geocoder = mbxGeocoding({ accessToken: mapBoxToken });
+const multer = require('multer');
+const {storage} = require('../cloudinary');
+const upload = multer({storage});
 
 
 //Index - show all campgrounds
@@ -21,12 +24,12 @@ router.get("/campgrounds/new", midleware.isLoggedIn, (req, res) =>{
 });
 
 
-
 //Create - add new campground to DB
-router.post("/campgrounds", midleware.isLoggedIn, async (req, res)=>{
+router.post("/campgrounds", [ midleware.isLoggedIn, upload.array('image')], async (req, res)=>{
   // get data from form and add to campgrounds array
+      
    let name = req.body.name;
-   let image = req.body.image;
+   let image = req.files.map(f => ({url: f.path, filename: f.filename}));
    let desc = req.body.description;
    let location = req.body.location;
    let author = {
@@ -78,23 +81,20 @@ router.get("/campgrounds/:id/edit",midleware.checkOwnership,(req, res)=>{
 });
 
 //Update campground route
-router.put("/campgrounds/:id",midleware.checkOwnership, async (req, res)=>{
-
+router.put("/campgrounds/:id",[midleware.checkOwnership, upload.array('image')], async (req, res)=>{
   const geoData = await geocoder.forwardGeocode({
         query: req.body.campground.location,
         limit: 1
     }).send();
-
+  let image = req.files.map(f => ({url: f.path, filename: f.filename}));
   let updateCamp = req.body.campground;
-  updateCamp = {updateCamp, geometry: geoData.body.features[0].geometry};
+  updateCamp = {...updateCamp,  geometry: geoData.body.features[0].geometry};
 
-  Campground.findByIdAndUpdate(req.params.id, updateCamp,(err,updatedCampground)=>{
-    if(err){
-      res.redirect("/campgrounds");
-    }else{
-      res.redirect("/campgrounds/" + req.params.id);
-    }
-  });
+  const campground = await Campground.findByIdAndUpdate(req.params.id, {...updateCamp});
+  campground.image.push(...image);
+  await campground.save();
+  req.flash('success', 'Successfully updated campground!');
+  res.redirect(`/campgrounds/${campground._id}`)
 });
 
 
